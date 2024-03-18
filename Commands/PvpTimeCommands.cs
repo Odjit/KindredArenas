@@ -21,7 +21,7 @@ namespace KindredArenas.Commands
                 pvpTime.DaysOfTheWeek |= DaysOfTheWeek.Sunday;
                 daysOfTheWeek = daysOfTheWeek.Replace("Su", "");
             }
-            if (daysOfTheWeek.Contains("M"))
+            if (daysOfTheWeek.Contains('M'))
             {
                 pvpTime.DaysOfTheWeek |= DaysOfTheWeek.Monday;
                 daysOfTheWeek = daysOfTheWeek.Replace("M", "");
@@ -31,7 +31,7 @@ namespace KindredArenas.Commands
                 pvpTime.DaysOfTheWeek |= DaysOfTheWeek.Tuesday;
                 daysOfTheWeek = daysOfTheWeek.Replace("Tu", "");
             }
-            if (daysOfTheWeek.Contains("W"))
+            if (daysOfTheWeek.Contains('W'))
             {
                 pvpTime.DaysOfTheWeek |= DaysOfTheWeek.Wednesday;
                 daysOfTheWeek = daysOfTheWeek.Replace("W", "");
@@ -41,7 +41,7 @@ namespace KindredArenas.Commands
                 pvpTime.DaysOfTheWeek |= DaysOfTheWeek.Thursday;
                 daysOfTheWeek = daysOfTheWeek.Replace("Th", "");
             }
-            if (daysOfTheWeek.Contains("F"))
+            if (daysOfTheWeek.Contains('F'))
             {
                 pvpTime.DaysOfTheWeek |= DaysOfTheWeek.Friday;
                 daysOfTheWeek = daysOfTheWeek.Replace("F", "");
@@ -67,17 +67,17 @@ namespace KindredArenas.Commands
             }
             // Get the am/pm
             var hours = startSplit[0];
-            var ampm = startSplit[1].Substring(2);
-            var minutes = startSplit[1].Substring(0, 2);
+            var ampm = startSplit[1][2..].ToLowerInvariant();
+            var minutes = startSplit[1][..2];
 
             // Handle leading zeros if they exist
             if (hours[0] == '0')
             {
-                hours = hours.Substring(1);
+                hours = hours[1..];
             }
             if (minutes[0] == '0')
             {
-                minutes = minutes.Substring(1);
+                minutes = minutes[1..];
             }
 
             if ((ampm != "am" && ampm != "pm") ||
@@ -105,17 +105,17 @@ namespace KindredArenas.Commands
             }
             // Get the am/pm
             hours = endSplit[0];
-            ampm = endSplit[1].Substring(2);
-            minutes = endSplit[1].Substring(0, 2);
+            ampm = endSplit[1][2..].ToLowerInvariant();
+            minutes = endSplit[1][..2];
 
             // Handle leading zeros if they exist
             if (hours[0] == '0')
             {
-                hours = hours.Substring(1);
+                hours = hours[1..];
             }
             if (minutes[0] == '0')
             {
-                minutes = minutes.Substring(1);
+                minutes = minutes[1..];
             }
 
             if ((ampm != "am" && ampm != "pm") ||
@@ -159,14 +159,14 @@ namespace KindredArenas.Commands
                 var startHour = pvpTime.StartHour > 12 ? pvpTime.StartHour - 12 : pvpTime.StartHour;
                 if (startHour == 0) startHour = 12;
                 var startMinute = pvpTime.StartMinute < 10 ? $"0{pvpTime.StartMinute}" : pvpTime.StartMinute.ToString();
-                var startAmPm = pvpTime.StartHour > 12 ? "pm" : "am";
+                var startAmPm = pvpTime.StartHour >= 12 ? "pm" : "am";
 
                 var endHour = pvpTime.EndHour > 12 ? pvpTime.EndHour - 12 : pvpTime.EndHour;
                 if (endHour == 0) endHour = 12;
                 var endMinute = pvpTime.EndMinute < 10 ? $"0{pvpTime.EndMinute}" : pvpTime.EndMinute.ToString();
-                var endAmPm = pvpTime.EndHour > 12 ? "pm" : "am";
+                var endAmPm = pvpTime.EndHour >= 12 ? "pm" : "am";
 
-                var pvpActive = Core.PvpService.IsPvpActiveDuringTime(pvpTime, DateTime.Now);
+                var pvpActive = PvpService.IsPvpActiveDuringTime(pvpTime, DateTime.Now);
 
                 sb.AppendLine($"{count + 1}{(pvpActive ? "*" : "")}: {dayString} - {startHour}:{startMinute}{startAmPm} - {endHour}:{endMinute}{endAmPm}");
                 count++;

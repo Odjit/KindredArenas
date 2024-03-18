@@ -30,7 +30,7 @@ namespace KindredArenas.Services
 
         protected virtual List<Zone> GetDefaultZones()
         {
-            return new List<Zone>();
+            return [];
         }
 
         public IEnumerable<Zone> GetZones()
@@ -76,9 +76,9 @@ namespace KindredArenas.Services
 
         public bool CreateZone(string name, float2 location, float radius)
         {
-            if (RetrieveZone(name, out var zone, out var arenaIndex)) return false;
+            if (RetrieveZone(name, out var _, out var _)) return false;
 
-            zone = new Zone
+            var zone = new Zone
             {
                 Name = name,
                 Location = location.xy,

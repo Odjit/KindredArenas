@@ -5,7 +5,7 @@ namespace KindredArenas.Services;
 
 internal class PrefabService
 {
-	PrefabCollectionSystem collectionSystem;
+    readonly PrefabCollectionSystem collectionSystem;
 	public PrefabCollectionSystem CollectionSystem => collectionSystem;
 
 	internal Dictionary<string, (string Name, PrefabGUID Prefab)> AllNameToGuid { get; init; } = [];

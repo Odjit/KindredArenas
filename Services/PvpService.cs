@@ -46,7 +46,7 @@ namespace KindredArenas.Services
         bool isPvpActive;
 
         const float ALERT_COOLDOWN = 2.5f;
-        Dictionary<Entity, float> lastAlertedPlayer = new();
+        readonly Dictionary<Entity, float> lastAlertedPlayer = [];
 
         public struct PvpTime
         {
@@ -121,7 +121,7 @@ namespace KindredArenas.Services
                 return a.StartMinute.CompareTo(b.StartMinute);
             });
 
-            DaysOfTheWeek FirstDay(DaysOfTheWeek days)
+            static DaysOfTheWeek FirstDay(DaysOfTheWeek days)
             {
                 for (int i = 0; i < 7; i++)
                 {
@@ -160,7 +160,6 @@ namespace KindredArenas.Services
         {
             // Get the current day of the week and time and check if it falls within any of the pvp times
             var now = DateTime.Now;
-            var day = (DaysOfTheWeek)(1 << (int)now.DayOfWeek);
             foreach(var pvpTime in pvpTimes)
             {
                 if (IsPvpActiveDuringTime(pvpTime, now))
@@ -169,7 +168,7 @@ namespace KindredArenas.Services
             return false;
         }
 
-        public bool IsPvpActiveDuringTime(PvpTime pvpTime, DateTime timeToCheck)
+        public static bool IsPvpActiveDuringTime(PvpTime pvpTime, DateTime timeToCheck)
         {
             var day = (DaysOfTheWeek)(1 << (int)timeToCheck.DayOfWeek);
             var hasToday = pvpTime.DaysOfTheWeek.HasFlag(day);

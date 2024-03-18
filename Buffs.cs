@@ -48,7 +48,7 @@ internal class Buffs
 
     public static bool HasBuff(Entity Character, PrefabGUID buffPrefab)
     {
-		return BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity);
+		return BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var _);
     }
 
     public static float GetBuffDuration(Entity Character, PrefabGUID buffPrefab)
