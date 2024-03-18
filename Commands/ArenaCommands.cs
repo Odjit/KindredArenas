@@ -30,7 +30,7 @@ namespace KindredArenas
         public static void CreatePvPArena(ChatCommandContext ctx, string name, float radius)
         {
             var pos = ctx.Event.SenderCharacterEntity.Read<Translation>().Value.xz;
-            if(Core.PvpArenaService.CreatePvpArena(name, pos, radius))
+            if(Core.PvpArenaService.CreateZone(name, pos, radius))
             {
                 ctx.Reply($"PvP arena '{name}' created at ({pos.x}, {pos.y}) with a radius of {radius}");
             }
@@ -43,7 +43,7 @@ namespace KindredArenas
         [Command("remove", "delete", description: "Removes a PvP arena", adminOnly: true)]
         public static void RemovePvPArena(ChatCommandContext ctx, string name)
         {
-            if(Core.PvpArenaService.RemovePvpArena(name))
+            if(Core.PvpArenaService.RemoveZone(name))
             {
                 ctx.Reply($"PvP arena '{name}' removed");
             }
@@ -59,7 +59,7 @@ namespace KindredArenas
             var sb = new StringBuilder();
             sb.AppendLine("PvP Arenas");
             int count = 0;
-            foreach (var arena in Core.PvpArenaService.GetPvpArenas())
+            foreach (var arena in Core.PvpArenaService.GetZones())
             {
                 sb.AppendLine($"{arena.Name} - Location: ({arena.Location.x}, {arena.Location.y}) Radius: {arena.Radius} Enabled: {arena.Enabled}");
                 count++;
@@ -79,7 +79,7 @@ namespace KindredArenas
         public static void ChangePvPArenaCenter(ChatCommandContext ctx, string name)
         {
             var pos = ctx.Event.SenderCharacterEntity.Read<Translation>().Value.xz;
-            if (Core.PvpArenaService.ChangePvpArenaCenter(name, pos))
+            if (Core.PvpArenaService.ChangeZoneCenter(name, pos))
             {
                 ctx.Reply($"PvP arena '{name}' center changed to ({pos.x}, {pos.y})");
             }
@@ -92,11 +92,11 @@ namespace KindredArenas
         [Command("radius", description: "Changes the radius of a PvP arena", adminOnly: true)]
         public static void ChangePvPArenaRadius(ChatCommandContext ctx, string name, float? radius=null)
         {
-            if(radius!=null && Core.PvpArenaService.ChangePvpArenaRadius(name, radius.Value))
+            if(radius!=null && Core.PvpArenaService.ChangeZoneRadius(name, radius.Value))
             {
                 ctx.Reply($"PvP arena '{name}' radius changed to {radius}");
             }
-            else if(Core.PvpArenaService.ChangePvpArenaRadius(name, ctx.Event.SenderCharacterEntity.Read<Translation>().Value.xz, out var newRadius))
+            else if(Core.PvpArenaService.ChangeZoneRadius(name, ctx.Event.SenderCharacterEntity.Read<Translation>().Value.xz, out var newRadius))
             {
                 ctx.Reply($"PvP arena '{name}' radius changed to {newRadius}");
             }
@@ -109,7 +109,7 @@ namespace KindredArenas
         [Command("enable", description: "Enables a PvP arena", adminOnly: true)]
         public static void EnablePvPArena(ChatCommandContext ctx, string name)
         {
-            if(Core.PvpArenaService.EnablePvpArena(name))
+            if(Core.PvpArenaService.EnableZone(name))
             {
                 ctx.Reply($"PvP arena '{name}' enabled");
             }
@@ -122,7 +122,7 @@ namespace KindredArenas
         [Command("disable", description: "Disables a PvP arena", adminOnly: true)]
         public static void DisablePvPArena(ChatCommandContext ctx, string name)
         {
-            if(Core.PvpArenaService.DisablePvpArena(name))
+            if(Core.PvpArenaService.DisableZone(name))
             {
                 ctx.Reply($"PvP arena '{name}' disabled");
             }
@@ -136,13 +136,13 @@ namespace KindredArenas
         public static void TeleportToPvPArena(ChatCommandContext ctx, string name)
         {
             var nameLower = name.ToLowerInvariant();
-            if(!Core.PvpArenaService.GetPvpArenas().Any(x => x.Name.ToLowerInvariant() == nameLower))
+            if(!Core.PvpArenaService.GetZones().Any(x => x.Name.ToLowerInvariant() == nameLower))
             {
                 ctx.Reply($"No PvP arena found matching '{name}'");
                 return;
             }
 
-            var pvpLocation = Core.PvpArenaService.GetPvpArenas().First(x => x.Name.ToLowerInvariant() == nameLower).Location;
+            var pvpLocation = Core.PvpArenaService.GetZones().First(x => x.Name.ToLowerInvariant() == nameLower).Location;
             var translation = Core.EntityManager.GetComponentData<Translation>(ctx.Event.SenderCharacterEntity);
             Core.EntityManager.SetComponentData(ctx.Event.SenderCharacterEntity, new LastTranslation { Value = new(pvpLocation.x, 0, pvpLocation.y) });
             Core.EntityManager.SetComponentData(ctx.Event.SenderCharacterEntity, new Translation { Value = new(pvpLocation.x, 0, pvpLocation.y) });
