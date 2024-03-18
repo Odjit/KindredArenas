@@ -27,6 +27,17 @@ namespace KindredArenas.Services
         protected static readonly string CONFIG_PATH = Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
         protected static readonly string PVP_TIMES_PATH = Path.Combine(CONFIG_PATH, "pvpTimes.json");
 
+        static readonly Dictionary<DaysOfTheWeek, DaysOfTheWeek> PREVIOUS_DAY = new()
+        {
+            { DaysOfTheWeek.Sunday, DaysOfTheWeek.Saturday },
+            { DaysOfTheWeek.Monday, DaysOfTheWeek.Sunday },
+            { DaysOfTheWeek.Tuesday, DaysOfTheWeek.Monday },
+            { DaysOfTheWeek.Wednesday, DaysOfTheWeek.Tuesday },
+            { DaysOfTheWeek.Thursday, DaysOfTheWeek.Wednesday },
+            { DaysOfTheWeek.Friday, DaysOfTheWeek.Thursday },
+            { DaysOfTheWeek.Saturday, DaysOfTheWeek.Friday }
+        };
+
         readonly List<Entity> users = [];
 
         readonly List<PvpTime> pvpTimes = [];
@@ -86,6 +97,37 @@ namespace KindredArenas.Services
         public void AddPvpTime(PvpTime pvpTime)
         {
             pvpTimes.Add(pvpTime);
+
+            // Sort the pvp times by start time
+            pvpTimes.Sort((a, b) =>
+            {
+                var aDay = FirstDay(a.DaysOfTheWeek);
+                var bDay = FirstDay(b.DaysOfTheWeek);
+                if (aDay != bDay)
+                {
+                    return aDay.CompareTo(bDay);
+                }
+
+                if (a.StartHour != b.StartHour)
+                {
+                    return a.StartHour.CompareTo(b.StartHour);
+                }
+                return a.StartMinute.CompareTo(b.StartMinute);
+            });
+
+            DaysOfTheWeek FirstDay(DaysOfTheWeek days)
+            {
+                for (int i = 0; i < 7; i++)
+                {
+                    var day = (DaysOfTheWeek)(1 << i);
+                    if (days.HasFlag(day))
+                    {
+                        return day;
+                    }
+                }
+                return 0;
+            }
+
             SavePvpTimes();
         }
 
@@ -115,20 +157,46 @@ namespace KindredArenas.Services
             var day = (DaysOfTheWeek)(1 << (int)now.DayOfWeek);
             foreach(var pvpTime in pvpTimes)
             {
-                if (pvpTime.DaysOfTheWeek.HasFlag(day))
+                if (IsPvpActiveDuringTime(pvpTime, now))
+                    return true;
+            }
+            return false;
+        }
+
+        public bool IsPvpActiveDuringTime(PvpTime pvpTime, DateTime timeToCheck)
+        {
+            var day = (DaysOfTheWeek)(1 << (int)timeToCheck.DayOfWeek);
+            var hasToday = pvpTime.DaysOfTheWeek.HasFlag(day);
+            var hasPreviousDay = pvpTime.DaysOfTheWeek.HasFlag(PREVIOUS_DAY[day]);
+
+            if(!hasToday && !hasPreviousDay) return false;
+
+            var start = new DateTime(timeToCheck.Year, timeToCheck.Month, timeToCheck.Day, pvpTime.StartHour, pvpTime.StartMinute, 0);
+            var end = new DateTime(timeToCheck.Year, timeToCheck.Month, timeToCheck.Day, pvpTime.EndHour, pvpTime.EndMinute, 0);
+
+            var endTimeBeforeStart = end <= start;
+            if (endTimeBeforeStart)
+            {
+                if (hasToday)
+                    end = end.AddDays(1);
+                else if (hasPreviousDay)
+                    start = start.AddDays(-1);
+            }
+
+            if (timeToCheck >= start && timeToCheck <= end)
+            {
+                return true;
+            }
+
+            // Check previous day if had today as well and end time is before start time
+            if (endTimeBeforeStart && hasToday && hasPreviousDay)
+            {
+                start = start.AddDays(-1);
+                end = end.AddDays(-1);
+
+                if (timeToCheck >= start && timeToCheck <= end)
                 {
-                    var start = new DateTime(now.Year, now.Month, now.Day, pvpTime.StartHour, pvpTime.StartMinute, 0);
-                    var end = new DateTime(now.Year, now.Month, now.Day, pvpTime.EndHour, pvpTime.EndMinute, 0);
-
-                    if(end < start)
-                    {
-                        end = end.AddDays(1);
-                    }
-
-                    if (now >= start && now <= end)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
             return false;

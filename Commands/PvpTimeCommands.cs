@@ -166,7 +166,9 @@ namespace KindredArenas.Commands
                 var endMinute = pvpTime.EndMinute < 10 ? $"0{pvpTime.EndMinute}" : pvpTime.EndMinute.ToString();
                 var endAmPm = pvpTime.EndHour > 12 ? "pm" : "am";
 
-                sb.AppendLine($"{count + 1}: {dayString} - {startHour}:{startMinute}{startAmPm} - {endHour}:{endMinute}{endAmPm}");
+                var pvpActive = Core.PvpService.IsPvpActiveDuringTime(pvpTime, DateTime.Now);
+
+                sb.AppendLine($"{count + 1}{(pvpActive ? "*" : "")}: {dayString} - {startHour}:{startMinute}{startAmPm} - {endHour}:{endMinute}{endAmPm}");
                 count++;
                 if (count % 7 == 0)
                 {
