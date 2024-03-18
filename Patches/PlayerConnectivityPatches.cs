@@ -22,6 +22,12 @@ public static class OnUserConnected_Patch
 
 			if (isNewVampire)
 			{
+				if(!PvpZoneUpdater.Initialized)
+				{
+                    Core.InitializeAfterLoaded();
+                    PvpZoneUpdater.Initialized = true;
+                }
+
 				Core.PvpArenaService.AddUser(userEntity);
 			}
 		}
