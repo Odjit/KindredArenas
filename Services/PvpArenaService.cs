@@ -1,9 +1,4 @@
-﻿
-using KindredArenas;
-using KindredArenas.Data;
-using ProjectM;
-using ProjectM.Network;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Unity.Mathematics;
 

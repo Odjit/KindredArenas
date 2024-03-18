@@ -50,4 +50,16 @@ internal class Buffs
     {
 		return BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity);
     }
+
+    public static float GetBuffDuration(Entity Character, PrefabGUID buffPrefab)
+    {
+		if (!BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity))
+			return 0;
+        if (buffEntity.Has<LifeTime>())
+        {
+            var lifetime = buffEntity.Read<LifeTime>();
+			return lifetime.Duration;
+        }
+		return -1;
+    }
 }

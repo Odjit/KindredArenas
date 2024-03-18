@@ -148,7 +148,5 @@ namespace KindredArenas
             Core.EntityManager.SetComponentData(ctx.Event.SenderCharacterEntity, new Translation { Value = new(pvpLocation.x, 0, pvpLocation.y) });
             ctx.Reply("Teleported to PvP arena");
         }
-
-
     }
 }
