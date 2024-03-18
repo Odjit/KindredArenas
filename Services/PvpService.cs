@@ -8,6 +8,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System;
+using UnityEngine;
 
 namespace KindredArenas.Services
 {
@@ -41,6 +42,11 @@ namespace KindredArenas.Services
         readonly List<Entity> users = [];
 
         readonly List<PvpTime> pvpTimes = [];
+
+        bool isPvpActive;
+
+        const float ALERT_COOLDOWN = 2.5f;
+        Dictionary<Entity, float> lastAlertedPlayer = new();
 
         public struct PvpTime
         {
@@ -214,16 +220,43 @@ namespace KindredArenas.Services
                 var charEntity = userEntity.Read<User>().LocalCharacter.GetEntityOnServer();
                 if (charEntity == Entity.Null) continue;
 
-                if (IsPvpActive())
+                var pvpStateChanged = false;
+                if (IsPvpActive() != isPvpActive)
+                {
+                    pvpStateChanged = true;
+                    isPvpActive = !isPvpActive;
+                    var msg = $"Vampire PvP is now {(isPvpActive ? "active" : "inactive")}";
+                    ServerChatUtils.SendSystemMessageToAllClients(Core.EntityManager, msg);
+                    Core.Log.LogInfo(msg);
+                }
+
+                if (isPvpActive)
                 {
                     var playerCharacter = charEntity.Read<PlayerCharacter>();
                     var playerPos = charEntity.Read<Translation>().Value;
                     if(Core.ElysiumService.PvpElysiumOn && Core.ElysiumService.IsInZone(playerPos.xz))
                     {
-                        Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
+                        if (!Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
+                        {
+                            if (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN)
+                            {
+                                lastAlertedPlayer[charEntity] = Time.time;
+                                var pc = charEntity.Read<PlayerCharacter>();
+                                var user = pc.UserEntity.Read<User>();
+                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Elysium and are safe from PvP combat");
+                            }
+                            Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
+                        }
                     }
                     else if (Buffs.GetBuffDuration(charEntity, Prefabs.Buff_General_PvPProtected) < 0)
                     {
+                        if (!pvpStateChanged && (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN))
+                        {
+                            lastAlertedPlayer[charEntity] = Time.time;
+                            var pc = charEntity.Read<PlayerCharacter>();
+                            var user = pc.UserEntity.Read<User>();
+                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Elysium and can engage in PvP combat");
+                        }
                         Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
                     }
                 }
@@ -235,10 +268,27 @@ namespace KindredArenas.Services
                         var playerPos = charEntity.Read<Translation>().Value;
                         if (Core.PvpArenaService.IsInZone(playerPos.xz))
                         {
-                            Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
+                            if (Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
+                            {
+                                if (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN)
+                                {
+                                    lastAlertedPlayer[charEntity] = Time.time;
+                                    var pc = charEntity.Read<PlayerCharacter>();
+                                    var user = pc.UserEntity.Read<User>();
+                                    ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Arena and can engage in PvP combat");
+                                }
+                                Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
+                            }
                         }
                         else if (!Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
                         {
+                            if (!pvpStateChanged && (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN))
+                            {
+                                lastAlertedPlayer[charEntity] = Time.time;
+                                var pc = charEntity.Read<PlayerCharacter>();
+                                var user = pc.UserEntity.Read<User>();
+                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Arena and are safe from PvP combat");
+                            }
                             Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
                         }
                     }
