@@ -22,13 +22,13 @@ public static class OnUserConnected_Patch
 
 			if (isNewVampire)
 			{
-				if(!PvpZoneUpdater.Initialized)
+				if(!PvpUpdater.Initialized)
 				{
                     Core.InitializeAfterLoaded();
-                    PvpZoneUpdater.Initialized = true;
+                    PvpUpdater.Initialized = true;
                 }
 
-				Core.PvpArenaService.AddUser(userEntity);
+				Core.PvpService.AddUser(userEntity);
 			}
 		}
 		catch (Exception e)
@@ -40,14 +40,14 @@ public static class OnUserConnected_Patch
 
 
 [HarmonyPatch(typeof(PlaceTileModelSystem), nameof(PlaceTileModelSystem.OnUpdate))]
-public static class PvpZoneUpdater
+public static class PvpUpdater
 {
 	public static bool Initialized = false;
     [HarmonyPostfix]
-    public static void UpdatePvpZone()
+    public static void Update()
     {
 		if(Initialized)
-			Core.PvpArenaService.UpdatePvpStatues();
+			Core.PvpService.Update();
     }
 }
 
@@ -58,7 +58,7 @@ public static class InitializationPatch
     public static void OneShot_AfterLoad_InitializationPatch()
     {
 		Core.InitializeAfterLoaded();
-		PvpZoneUpdater.Initialized = true;
+        PvpUpdater.Initialized = true;
         Plugin.Harmony.Unpatch(typeof(SpawnTeamSystem_OnPersistenceLoad).GetMethod("OnUpdate"), typeof(InitializationPatch).GetMethod("OneShot_AfterLoad_InitializationPatch"));
     }
 }
