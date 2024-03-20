@@ -48,6 +48,8 @@ namespace KindredArenas.Services
         const float ALERT_COOLDOWN = 2.5f;
         readonly Dictionary<Entity, float> lastAlertedPlayer = [];
 
+        readonly HashSet<Entity> messagedHasBuffFromZone = new();
+
         public struct PvpTime
         {
             public DaysOfTheWeek DaysOfTheWeek { get; set; }
@@ -219,10 +221,9 @@ namespace KindredArenas.Services
                 var charEntity = userEntity.Read<User>().LocalCharacter.GetEntityOnServer();
                 if (charEntity == Entity.Null) continue;
 
-                var pvpStateChanged = false;
                 if (IsPvpActive() != isPvpActive)
                 {
-                    pvpStateChanged = true;
+                    messagedHasBuffFromZone.Clear();
                     isPvpActive = !isPvpActive;
                     var msg = $"Vampire PvP is now {(isPvpActive ? "active" : "inactive")}";
                     ServerChatUtils.SendSystemMessageToAllClients(Core.EntityManager, msg);
@@ -235,22 +236,21 @@ namespace KindredArenas.Services
                     var playerPos = charEntity.Read<Translation>().Value;
                     if(Core.ElysiumService.PvpElysiumOn && Core.ElysiumService.IsInZone(playerPos.xz))
                     {
-                        if (!Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
+                        if (!messagedHasBuffFromZone.Contains(charEntity) && (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN))
                         {
-                            if (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN)
-                            {
-                                lastAlertedPlayer[charEntity] = Time.time;
-                                var pc = charEntity.Read<PlayerCharacter>();
-                                var user = pc.UserEntity.Read<User>();
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Elysium and are safe from PvP combat");
-                            }
-                            Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
+                            messagedHasBuffFromZone.Add(charEntity);
+                            lastAlertedPlayer[charEntity] = Time.time;
+                            var pc = charEntity.Read<PlayerCharacter>();
+                            var user = pc.UserEntity.Read<User>();
+                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Elysium and are safe from PvP combat");
                         }
+                        Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
                     }
                     else if (Buffs.GetBuffDuration(charEntity, Prefabs.Buff_General_PvPProtected) < 0)
                     {
-                        if (!pvpStateChanged && (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN))
+                        if (messagedHasBuffFromZone.Contains(charEntity) && ((!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN)))
                         {
+                            messagedHasBuffFromZone.Remove(charEntity);
                             lastAlertedPlayer[charEntity] = Time.time;
                             var pc = charEntity.Read<PlayerCharacter>();
                             var user = pc.UserEntity.Read<User>();
@@ -267,27 +267,26 @@ namespace KindredArenas.Services
                         var playerPos = charEntity.Read<Translation>().Value;
                         if (Core.PvpArenaService.IsInZone(playerPos.xz))
                         {
-                            if (Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
+                            if (messagedHasBuffFromZone.Contains(charEntity) && (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN))
                             {
-                                if (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN)
-                                {
-                                    lastAlertedPlayer[charEntity] = Time.time;
-                                    var pc = charEntity.Read<PlayerCharacter>();
-                                    var user = pc.UserEntity.Read<User>();
-                                    ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Arena and can engage in PvP combat");
-                                }
-                                Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
+                                messagedHasBuffFromZone.Remove(charEntity);
+                                lastAlertedPlayer[charEntity] = Time.time;
+                                var pc = charEntity.Read<PlayerCharacter>();
+                                var user = pc.UserEntity.Read<User>();
+                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Arena and can engage in PvP combat");
                             }
+                            Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
                         }
                         else if (!Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
                         {
-                            if (!pvpStateChanged && (!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN))
+                            if (!messagedHasBuffFromZone.Contains(charEntity) && ((!lastAlertedPlayer.TryGetValue(charEntity, out var lastAlerted) || (Time.time - lastAlerted) > ALERT_COOLDOWN)))
                             {
                                 lastAlertedPlayer[charEntity] = Time.time;
                                 var pc = charEntity.Read<PlayerCharacter>();
                                 var user = pc.UserEntity.Read<User>();
                                 ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Arena and are safe from PvP combat");
                             }
+                            messagedHasBuffFromZone.Add(charEntity);
                             Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
                         }
                     }
