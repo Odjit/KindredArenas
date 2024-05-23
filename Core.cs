@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using BepInEx.Logging;
+using KindredArenas.Services;
 using ProjectM;
 using Unity.Entities;
 
@@ -16,6 +17,7 @@ internal static class Core
 
     public static Services.PvpService PvpService { get; internal set; }
     public static Services.PvpArenaService PvpArenaService { get; internal set; }
+	public static Services.PvpRegionsService PvpRegionsService { get; internal set; }
 	public static Services.ElysiumService ElysiumService { get; internal set; }
 
 	public static void LogException(System.Exception e, [CallerMemberName] string caller = null)
@@ -31,7 +33,8 @@ internal static class Core
 		ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
 		PvpService = new();
         PvpArenaService = new();
-		ElysiumService = new();
+        PvpRegionsService = new();
+        ElysiumService = new();
 		_hasInitialized = true;
 		Log.LogInfo($"{nameof(InitializeAfterLoaded)} completed");
 	}

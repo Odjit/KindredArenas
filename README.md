@@ -20,6 +20,9 @@ Time must be in 12 hour format with AM or PM. HH:MMam or HH:MMpm
 
 A note about on/off commands: All arenas/elysiums are globally on at server start. If you are globally turning off all arenas/elysiums, that will not persist through server restart. If you are disabling a specific arena/elysium, that will persist through server restart.
 
+Regions are a way to set PvP or PvE status for a specific area. This is useful for setting up areas that are always PvP or PvE regardless of the time of day. Keep in mind through, any Arenas or Elysiums will still follow the normal rules according to PvPTime.
+So if Dunley is set to PvE always, but there is an Arena in the coliseum, the coliseum will still be PvP. However, if PvPtime becomes active, and it switches to Elysiums, that arena in the coliseum will no longer work (though Dunley will remain PvE).
+
 ---
 Also, thanks to the V Rising modding and server communities for ideas and requests!
 Feel free to reach out to me on discord (odjit) if you have any questions or need help with the mod.
@@ -105,6 +108,15 @@ Feel free to reach out to me on discord (odjit) if you have any questions or nee
   - Example: *.elysium teleport Test*
   - Shortcut: *.elysium tp*
   
+### Region Commands
+- `listpvpregions`
+  - Lists all regions with their PvP or PvE status
+- `addpvpregion (regionname)`
+  - Adds a region to the PvP list
+- `addpveregion (regionname)`
+  - Adds a region to the PvE list
+- `addneutralregion (regionname)`
+  - Adds a region back to the neutral list
   
 ## Eventual To-Do/Possible features
 - make non-circle shaped arenas/elysiums
