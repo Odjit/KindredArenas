@@ -2,13 +2,14 @@ using ProjectM.Network;
 using ProjectM;
 using Unity.Entities;
 using ProjectM.Shared;
+using Stunlock.Core;
 
 namespace KindredArenas;
 internal class Buffs
 {
-	public static void AddBuff(Entity User, Entity Character, PrefabGUID buffPrefab, bool dontExpire = false)
+	public static bool AddBuff(Entity User, Entity Character, PrefabGUID buffPrefab, int duration = 0, bool immortal = true)
 	{
-		var des = Core.Server.GetExistingSystem<DebugEventsSystem>();
+		var des = Core.Server.GetExistingSystemManaged<DebugEventsSystem>();
 		var buffEvent = new ApplyBuffDebugEvent()
 		{
 			BuffPrefabGUID = buffPrefab
@@ -19,47 +20,99 @@ internal class Buffs
 			User = User,
 			Character = Character
 		};
-		des.ApplyBuff(fromCharacter, buffEvent);
-
-		if (dontExpire)
+		if (!BuffUtility.TryGetBuff(Core.Server.EntityManager, Character, buffPrefab, out Entity buffEntity))
 		{
-			if (BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity))
+			des.ApplyBuff(fromCharacter, buffEvent);
+			if (BuffUtility.TryGetBuff(Core.Server.EntityManager, Character, buffPrefab, out buffEntity))
 			{
-				if (buffEntity.Has<LifeTime>())
+				if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
 				{
+					buffEntity.Remove<CreateGameplayEventsOnSpawn>();
+				}
+				if (buffEntity.Has<GameplayEventListeners>())
+				{
+					buffEntity.Remove<GameplayEventListeners>();
+				}
+
+				if (immortal)
+				{
+					buffEntity.Add<Buff_Persists_Through_Death>();
+					if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
+					{
+						buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+					}
+
+					if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
+					{
+						buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
+					}
+				}
+				if (duration > -1 && duration != 0)
+				{
+					if (!buffEntity.Has<LifeTime>())
+					{
+						buffEntity.Add<LifeTime>();
+						buffEntity.Write(new LifeTime
+						{
+							EndAction = LifeTimeEndAction.Destroy
+						});
+					}
+
 					var lifetime = buffEntity.Read<LifeTime>();
-					lifetime.Duration = -1;
-					lifetime.EndAction = LifeTimeEndAction.None;
+					lifetime.Duration = duration;
 					buffEntity.Write(lifetime);
 				}
+				else if (duration == -1)
+				{
+					if (buffEntity.Has<LifeTime>())
+					{
+						var lifetime = buffEntity.Read<LifeTime>();
+						lifetime.Duration = -1;
+						lifetime.EndAction = LifeTimeEndAction.None;
+						buffEntity.Write(lifetime);
+					}
+					if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
+					{
+						buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+					}
+					if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
+					{
+						buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
+					}
+				}
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
+		else
+		{
+			return false;
+		}
 	}
-
-	public static bool RemoveBuff(Entity Character, PrefabGUID buffPrefab)
+	public static void RemoveBuff(Entity Character, PrefabGUID buffPrefab)
 	{
 		if (BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity))
 		{
 			DestroyUtility.Destroy(Core.EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-			return true;
 		}
-		return false;
 	}
-
     public static bool HasBuff(Entity Character, PrefabGUID buffPrefab)
     {
-		return BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var _);
+        return BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var _);
     }
 
     public static float GetBuffDuration(Entity Character, PrefabGUID buffPrefab)
     {
-		if (!BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity))
-			return 0;
+        if (!BuffUtility.TryGetBuff(Core.EntityManager, Character, buffPrefab, out var buffEntity))
+            return 0;
         if (buffEntity.Has<LifeTime>())
         {
             var lifetime = buffEntity.Read<LifeTime>();
-			return lifetime.Duration;
+            return lifetime.Duration;
         }
-		return -1;
+        return -1;
     }
 }

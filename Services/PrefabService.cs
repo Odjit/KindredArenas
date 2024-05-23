@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ProjectM;
+using Stunlock.Core;
 
 namespace KindredArenas.Services;
 
@@ -13,7 +14,7 @@ internal class PrefabService
 
 	internal PrefabService()
 	{
-		collectionSystem = Core.Server.GetExistingSystem<PrefabCollectionSystem>();
+		collectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
 
 		var allPrefabs = collectionSystem.NameToPrefabGuidDictionary;
 		Core.Log.LogDebug($"All prefabs: {allPrefabs.Count}");

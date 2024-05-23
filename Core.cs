@@ -28,7 +28,7 @@ internal static class Core
 	{
 		if (_hasInitialized) return;
 
-		ServerGameSettingsSystem = Server.GetExistingSystem<ServerGameSettingsSystem>();
+		ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
 		PvpService = new();
         PvpArenaService = new();
 		ElysiumService = new();

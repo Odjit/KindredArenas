@@ -244,7 +244,7 @@ namespace KindredArenas.Services
                             var user = pc.UserEntity.Read<User>();
                             ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Elysium and are safe from PvP combat");
                         }
-                        Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
+                        Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, -1, true);
                     }
                     else if (Buffs.GetBuffDuration(charEntity, Prefabs.Buff_General_PvPProtected) < 0)
                     {
@@ -287,7 +287,7 @@ namespace KindredArenas.Services
                                 ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Arena and are safe from PvP combat");
                             }
                             messagedHasBuffFromZone.Add(charEntity);
-                            Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
+                            Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, -1, true);
                         }
                     }
                     else
@@ -295,7 +295,7 @@ namespace KindredArenas.Services
                         if (!Buffs.HasBuff(charEntity, Prefabs.Buff_General_PvPProtected))
                         {
                             var playerCharacter = charEntity.Read<PlayerCharacter>();
-                            Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, true);
+                            Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, -1, true);
                         }
                     }
                 }
