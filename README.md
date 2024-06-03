@@ -1,16 +1,24 @@
 ![](logo.png)
 # KindredArenas for V Rising
 KindredArenas is a server modification for VRising PvP servers.
-Best use is with PvP always on.
+Best use is with PvP always on. Does not effect sieging, only player vs player combat. Be careful not to put Elysiums in the way of sieges, as defenders will not be able to stop siegers.
 
-Arenas = PvP always enabled in the specified area unless overlapping with an Elysium during PvP time. 
+KindredArenas has two modes: Arenas mode and Elysiums mode. 
+On initial server start, it will be in Arenas mode.
 
-Elysiums = PvP always disabled in the specified area unless overlapping with an Arena not during PvP time. 
+Arena mode= The world: PvP protected. The arenas: PvP enabled.
+Elysiums mode= The world: PvP enabled. The elysiums: PvP protected.
+
+Which mode you are in is determined by PvPtime commands set with the .pvptime command. (NOT server settings)
+If PvPtime is active, it will be Elysiums mode. If PvPtime is off, it will be Arenas mode.
+
+If you are in Arena mode, you can set up arenas with the .arena commands. Elysiums will not work in this mode.
+If you are in Elysiums mode, you can set up elysiums with the .elysium commands. Arenas will not work in this mode.
 
 
 PvP time commands are available to set specific times for PvP to be enabled through protection. 
-If PvP time is ongoing, all players are not PvP protected except in designated Elysiums.
-If PvP time is off schedule, all players are PvP protected except in designated Arenas.
+If PvP time is ongoing (Elysium mode), all players are not PvP protected except in designated Elysiums.
+If PvP time is off schedule (Arena mode), all players are PvP protected except in designated Arenas.
 
 Days must be abbreviated enough to differentiate from each other. (Su, M, Tu, W, Th, F, Sa) 
 Each day must be specified, there is no M-F or Su-Sa.
@@ -20,7 +28,8 @@ Time must be in 12 hour format with AM or PM. HH:MMam or HH:MMpm
 
 A note about on/off commands: All arenas/elysiums are globally on at server start. If you are globally turning off all arenas/elysiums, that will not persist through server restart. If you are disabling a specific arena/elysium, that will persist through server restart.
 
-Regions are a way to set PvP or PvE status for a specific area. This is useful for setting up areas that are always PvP or PvE regardless of the time of day. Keep in mind through, any Arenas or Elysiums will still follow the normal rules according to PvPTime.
+New Addition: Region commands.
+Regions are a way to set PvP or PvE status for a specific region. This is useful for setting up areas that are always PvP or PvE regardless of the time of day (PvPTime). Keep in mind through, any Arenas or Elysiums will still follow the normal rules according to PvPTime.
 So if Dunley is set to PvE always, but there is an Arena in the coliseum, the coliseum will still be PvP. However, if PvPtime becomes active, and it switches to Elysiums, that arena in the coliseum will no longer work (though Dunley will remain PvE).
 
 ---
@@ -119,5 +128,4 @@ Feel free to reach out to me on discord (odjit) if you have any questions or nee
   - Adds a region back to the neutral list
   
 ## Eventual To-Do/Possible features
-- make non-circle shaped arenas/elysiums
-- maybe add a height component to the arenas/elysiums so only certain floors are arenas/elysiums. 
+- Mod will eventually be completely revamped.
