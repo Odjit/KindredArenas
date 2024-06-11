@@ -7,8 +7,10 @@ namespace KindredArenass.Commands.Converters;
 
 
 public record struct FoundRegion(WorldRegionType Value, string Name);
-public class FoundRegionConverter : CommandArgumentConverter<FoundRegion>
+public class FoundRegionConverter : CommandArgumentConverter<FoundRegion>, IConverterUsage
 {
+	public string Usage => "start, woods, farmlands, forest, mountains, hills, south, north, ruins, none";
+
 	public override FoundRegion Parse(ICommandContext ctx, string input)
 	{
 		var region = Enum.GetValues(typeof(WorldRegionType)).Cast<WorldRegionType>().FirstOrDefault(x => x.ToString().Equals(input, StringComparison.OrdinalIgnoreCase));
