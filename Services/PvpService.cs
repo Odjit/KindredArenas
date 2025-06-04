@@ -230,8 +230,8 @@ namespace KindredArenas.Services
                 {
                     messagedHasBuffFromZone.Clear();
                     isPvpActive = !isPvpActive;
-                    var msg = $"Vampire PvP is now {(isPvpActive ? "<color=red>active</color>" : "<color=green>inactive</color>")}";
-                    ServerChatUtils.SendSystemMessageToAllClients(Core.EntityManager, msg);
+                    var msg = new Unity.Collections.FixedString512Bytes($"Vampire PvP is now {(isPvpActive ? "<color=red>active</color>" : "<color=green>inactive</color>")}");
+                    ServerChatUtils.SendSystemMessageToAllClients(Core.EntityManager, ref msg);
                     Core.Log.LogInfo(msg);
                     inPveRegion.Clear();
                     inPvpRegion.Clear();
@@ -255,7 +255,7 @@ namespace KindredArenas.Services
                                 lastAlertedPlayer[charEntity] = Time.time;
                                 var pc = charEntity.Read<PlayerCharacter>();
                                 var user = pc.UserEntity.Read<User>();
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered a region that is always <color=green>PvE</color>");
+                                Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have entered a region that is always <color=green>PvE</color>");
                             }
                             Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, -1, true);
                         }
@@ -269,7 +269,7 @@ namespace KindredArenas.Services
                             lastAlertedPlayer[charEntity] = Time.time;
                             var pc = charEntity.Read<PlayerCharacter>();
                             var user = pc.UserEntity.Read<User>();
-                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Elysium and are <color=green>safe</color> from PvP combat");
+                            Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Elysium and are <color=green>safe</color> from PvP combat");
                         }
                         Buffs.AddBuff(playerCharacter.UserEntity, charEntity, Prefabs.Buff_General_PvPProtected, -1, true);
                     }
@@ -285,11 +285,11 @@ namespace KindredArenas.Services
                             if(inPveRegion.Contains(charEntity))
                             {
                                 inPveRegion.Remove(charEntity);
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left a PvE region and can engage in <color=red>PvP</color> combat");
+                                Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have left a PvE region and can engage in <color=red>PvP</color> combat");
                             }
                             else
                             {
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Elysium and can engage in <color=red>PvP</color> combat");
+                                Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Elysium and can engage in <color=red>PvP</color> combat");
                             }
                         }
                         Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
@@ -307,7 +307,7 @@ namespace KindredArenas.Services
                                 lastAlertedPlayer[charEntity] = Time.time;
                                 var pc = charEntity.Read<PlayerCharacter>();
                                 var user = pc.UserEntity.Read<User>();
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered a region that is always <color=red>PvP</color>");
+                                Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have entered a region that is always <color=red>PvP</color>");
                             }
                             Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
                         }
@@ -321,7 +321,7 @@ namespace KindredArenas.Services
                             lastAlertedPlayer[charEntity] = Time.time;
                             var pc = charEntity.Read<PlayerCharacter>();
                             var user = pc.UserEntity.Read<User>();
-                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Arena and can engage in <color=red>PvP</color> combat");
+                            Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have entered an Arena and can engage in <color=red>PvP</color> combat");
                         }
                         Buffs.RemoveBuff(charEntity, Prefabs.Buff_General_PvPProtected);
                     }
@@ -335,11 +335,11 @@ namespace KindredArenas.Services
                             if (inPvpRegion.Contains(charEntity))
                             {
                                 inPvpRegion.Remove(charEntity);
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left a PvP region and are <color=green>safe</color> from PvP combat");
+                                Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have left a PvP region and are <color=green>safe</color> from PvP combat");
                             }
                             else
                             {
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Arena and are <color=green>safe</color> from PvP combat");
+                                Helper.SendSystemMessageToClient(Core.EntityManager, user, "You have left an Arena and are <color=green>safe</color> from PvP combat");
                             }
                         }
                         messagedHasBuffFromZone.Add(charEntity);

@@ -60,7 +60,7 @@ namespace KindredArenas.Commands
 
             // Convert string of start time to hours and minutes
             var startSplit = startTime.Split(':');
-            if (startSplit.Length != 2 && startSplit[0].Length >= 1 && startSplit[0].Length <= 2 && startSplit[1].Length == 4)
+            if (startSplit.Length != 2 || startSplit[0].Length < 1 || startSplit[0].Length > 2 || startSplit[1].Length != 4)
             {
                 ctx.Reply($"Invalid start time '{startTime}'!  Should be in the format 'HH:MMam' or 'HH:MMpm'");
                 return;

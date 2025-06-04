@@ -1,6 +1,8 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Il2CppInterop.Runtime;
+using ProjectM;
+using ProjectM.Network;
 namespace KindredArenas
 {
     internal class Helper
@@ -45,6 +47,12 @@ namespace KindredArenas
 
             var entities = query.ToEntityArray(Allocator.Temp);
             return entities;
+        }
+
+        public static void SendSystemMessageToClient(EntityManager entityManager, User user, string message)
+        {
+            var msg = new FixedString512Bytes(message);
+            ServerChatUtils.SendSystemMessageToClient(entityManager, user, ref msg);
         }
     }
 }

@@ -1,6 +1,7 @@
 ![](logo.png)
 # KindredArenas for V Rising
 KindredArenas is a server modification for VRising PvP servers.
+Updated for Oakveil as of 1.4
 Best use is with PvP always on. Does not effect sieging, only player vs player combat. Be careful not to put Elysiums in the way of sieges, as defenders will not be able to stop siegers.
 
 KindredArenas has two modes: Arenas mode and Elysiums mode. 

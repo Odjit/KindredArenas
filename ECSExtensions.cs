@@ -61,16 +61,16 @@ public static class ECSExtensions
 	{
 		var ct = new ComponentType(Il2CppType.Of<T>());
 		return Core.EntityManager.HasComponent(entity, ct);
-	}
+    }
 
-	public static string LookupName(this PrefabGUID prefabGuid)
-	{
-		var prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
-		return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
-			? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
-	}
+    public static string LookupName(this PrefabGUID prefabGuid)
+    {
+        var prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+        return (prefabCollectionSystem._PrefabLookupMap.GuidToEntityMap.ContainsKey(prefabGuid)
+            ? prefabCollectionSystem._PrefabLookupMap.GetName(prefabGuid) + " PrefabGuid(" + prefabGuid.GuidHash + ")" : "GUID Not Found");
+    }
 
-	public static void Add<T>(this Entity entity)
+    public static void Add<T>(this Entity entity)
 	{
 		var ct = new ComponentType(Il2CppType.Of<T>());
 		Core.EntityManager.AddComponent(entity, ct);
